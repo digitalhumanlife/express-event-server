@@ -14,7 +14,7 @@ const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
 async function getTransferDetails(event) {
   const { account: from, to, amount } = event.args;
-  console.log(event.args);
+  console.log("Inside getTransDetail: "+event.args);
   console.log(`From: ${from} - To: ${to} - Value: ${amount} detected`);
 }
 
@@ -30,22 +30,34 @@ async function getEvents() {
 }
 
 getEvents();
-console.log(':: getEvents() done!');
+console.log(':: ---------------------- getEvents() done! -----------------------');
+const filter = {
+      address: CONTRACT_ADDRESS,
+      topics:[ethers.utils.id("UpdatedDiv(address,uint256)")]
+    }
+provider.on(filter, (e)=>{
+  console.log("Event detected(PROVIDER): "+ JSON.stringify(e, null, 2))
+})
+contract.on("UpdatedDiv", (holderAddress, value, event)=>{
+  console.log("Event detected(CONTRACT): "+ holderAddress + " " + value)
+  console.log("evevnt > ", event)
+  //console.log(event)
+})
 
-app.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}`);
-  const filter = {
-    address: CONTRACT_ADDRESS,
-    topics:[ethers.utils.id("UpdatedDiv(address,uint256)")]
-  }
-  provider.on(filter, (e)=>{
-    console.log("Event detected: "+ e.account)
-  })
-  contract.on("UpdatedDiv", (holderAddress, value, event)=>{
-    console.log("Event detected: "+ holderAddress + " " + value)
-    console.log(event)
-  })
-});
+// app.listen(PORT, () => {
+//   console.log(`Listening on port ${PORT}`);
+//   const filter = {
+//     address: CONTRACT_ADDRESS,
+//     topics:[ethers.utils.id("UpdatedDiv(address,uint256)")]
+//   }
+//   provider.on(filter, (e)=>{
+//     console.log("Event detected: "+ e.account)
+//   })
+//   contract.on("UpdatedDiv", (holderAddress, value, event)=>{
+//     console.log("Event detected: "+ holderAddress + " " + value)
+//     console.log(event)
+//   })
+// });
 
 
 // const express = require('express')
